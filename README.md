@@ -1,4 +1,4 @@
-# AI Telemetry — RaceExplainer
+<img width="1847" height="732" alt="image" src="https://github.com/user-attachments/assets/4f494032-a03a-4546-aed7-2bc3f71be6bb" /># AI Telemetry — RaceExplainer
 
 A Formula 1 telemetry analysis application built on the OpenF1 API.
 The app reconstructs race data such as driver positions, grid order, pit stops, fastest laps, and tyre strategies, and presents them through interactive visualizations.
@@ -38,6 +38,14 @@ This starts:
 * **Frontend:** [http://localhost:5173](http://localhost:5173) (or next available port)
 
 ---
+## 🖼️ Screenshots
+
+Screenshots showcasing key parts of the application UI and data visualizations.
+
+<img width="1867" height="883" alt="image" src="https://github.com/user-attachments/assets/59dfcb63-0746-414c-bef3-dc712df1a425" />
+<img width="1847" height="732" alt="image" src="https://github.com/user-attachments/assets/722a5324-8bb7-44ea-af7f-6b2e4099fb01" />
+<img width="1857" height="881" alt="image" src="https://github.com/user-attachments/assets/8b0e577a-ebf6-48a5-9913-264cdfee15cb" />
+
 
 ## 🏗️ Architecture
 
