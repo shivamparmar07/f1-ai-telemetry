@@ -1,13 +1,7 @@
-<<<<<<< HEAD
-# AI Telemetry - RaceExplainer
+# AI Telemetry — RaceExplainer
 
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
-
-An advanced F1 telemetry analysis app powered by OpenF1 API and Google's Gemini AI. Get real-time race data, driver analysis, tyre strategies, and AI-powered insights.
-
-**View your app in AI Studio:** https://ai.studio/apps/temp/1
+A Formula 1 telemetry analysis application built on the OpenF1 API.  
+The app reconstructs race data such as driver positions, grid order, pit stops, fastest laps, and tyre strategies, and presents them through interactive visualizations.
 
 ---
 
@@ -15,354 +9,248 @@ An advanced F1 telemetry analysis app powered by OpenF1 API and Google's Gemini 
 
 ### Prerequisites
 - Node.js (v16+)
-- Gemini API key
 
 ### Installation
 
-1. **Install dependencies:**
+1. **Install dependencies**
    ```bash
    npm install
-   ```
+Configure environment
+Create a .env.local file:
 
-2. **Configure environment:**
-   - Open `.env.local` and set your Gemini API key:
-     ```
-     VITE_GEMINI_API_KEY=your_gemini_api_key_here
-     ```
+bash
+Copy code
+VITE_BACKEND_URL=http://localhost:5000
+Run the app
 
-3. **Run the app:**
-   ```bash
-   npm run dev
-   ```
-
+bash
+Copy code
+npm run dev
 This starts:
-- **Backend:** Express server on `http://localhost:5000`
-- **Frontend:** Vite on `http://localhost:5173` (or next available port)
 
----
+Backend: Express server at http://localhost:5000
 
-## 🏗️ Architecture
+Frontend: Vite dev server at http://localhost:5173 (or next available port)
 
-### Overview
-
-```
-Frontend (React 19 + TypeScript)
+🏗️ Architecture
+Overview
+scss
+Copy code
+Frontend (React + TypeScript)
     ↓ (HTTP REST + WebSocket)
 Backend (Express.js)
-    ↓ (Cached, rate-limited polling)
-OpenF1 API (max 1 req/second)
-```
+    ↓ (Rate-limited polling + cache)
+OpenF1 API
+Why This Architecture?
+Problem
 
-### Why This Architecture?
+OpenF1 enforces strict rate limits
 
-**Problem:** Direct frontend API calls resulted in 429 rate-limiting errors
-- 8 parallel requests per driver selection
-- No caching, repeated requests
-- Rapid burst traffic to OpenF1
+Parallel frontend requests caused frequent 429 Too Many Requests
 
-**Solution:** Backend polling with rate limiting & caching
-- ✅ 1 request per second to OpenF1 API
-- ✅ In-memory cache with TTL (1hr static, 5min race data)
-- ✅ WebSocket for real-time cache updates
-- ✅ Exponential backoff retry logic
+No shared cache between clients
 
----
+Solution
 
-## 📊 Features
+Backend-controlled request queue
 
-### Data Visualization
-- **Position Graph** - Real-time driver position changes throughout race
-- **Tyre Strategy** - Visualize compound changes and stint timing
-- **Fastest Lap** - Extracted from real OpenF1 lap duration data
-- **Pit Stops** - Count of actual pit stops during race
+Centralized caching with TTL
 
-### AI Analysis
-- Real-time race analysis using Google Gemini
-- Performance ratings (1-10)
-- Pace index calculation
-- Key moments identification
-- Positive/negative performance indicators
+WebSocket-based updates
 
-### Multi-Season Support
-- 2025, 2024, 2023 F1 seasons
-- Complete driver lineups
-- All race sessions
+Benefits
 
-### Data Accuracy
-- Grid positions from Qualifying session results
-- Position history correlated via timestamp matching
-- Real lap times from OpenF1 data
+Stable API usage
 
----
+Faster repeated requests
 
-## 🔧 API Endpoints
+Consistent data across clients
 
-### Backend REST API
+📊 Features
+Telemetry & Race Data
+Driver position history
 
-All endpoints include built-in caching and rate limiting.
+Starting grid reconstruction
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/meetings/:year` | GET | Get all meetings for a season |
-| `/api/sessions/:meetingKey` | GET | Get sessions for a meeting |
-| `/api/drivers/:sessionKey` | GET | Get drivers in a session |
-| `/api/session-results/:sessionKey` | GET | Get final results for session |
-| `/api/grid/:sessionKey` | GET | Get starting grid positions |
-| `/api/stints/:sessionKey/:driverNumber` | GET | Get tyre stints for driver |
-| `/api/laps/:sessionKey/:driverNumber` | GET | Get lap data for driver |
-| `/api/positions/:sessionKey/:driverNumber` | GET | Get position history for driver |
-| `/health` | GET | Backend health check |
+Fastest lap calculation
 
-### WebSocket Connection
+Pit stop counting
 
-Frontend connects to `ws://localhost:5000` for real-time cache updates.
+Tyre compound and stint visualization
 
----
+Multi-Season Support
+2025, 2024, 2023 seasons
 
-## 📁 Project Structure
+Complete driver lineups
 
-```
+All race sessions
+
+Data Accuracy
+Grid positions derived from Qualifying results
+
+Timestamp-based position reconstruction
+
+Real lap durations from OpenF1
+
+🔧 Backend API
+All endpoints are cached and rate-limited.
+
+Endpoint	Method	Description
+/api/meetings/:year	GET	Meetings for a season
+/api/sessions/:meetingKey	GET	Sessions for a meeting
+/api/drivers/:sessionKey	GET	Drivers in a session
+/api/session-results/:sessionKey	GET	Final session results
+/api/grid/:sessionKey	GET	Starting grid
+/api/stints/:sessionKey/:driverNumber	GET	Tyre stints
+/api/laps/:sessionKey/:driverNumber	GET	Lap data
+/api/positions/:sessionKey/:driverNumber	GET	Position history
+/health	GET	Health check
+
+WebSocket
+Clients connect to ws://localhost:5000 for real-time cache updates.
+
+📁 Project Structure
+pgsql
+Copy code
 .
 ├── public/
-│   └── vite.svg
 ├── src/
 │   ├── components/
-│   │   ├── AIAnalysis.tsx          # AI insights display
-│   │   ├── DriverCard.tsx          # Driver info panel
-│   │   ├── Header.tsx              # Season/race/driver selector
-│   │   ├── TelemetryChart.tsx      # Position graph visualization
-│   │   └── TyreStrategy.tsx        # Tyre compound timeline
+│   │   ├── DriverCard.tsx
+│   │   ├── Header.tsx
+│   │   ├── TelemetryChart.tsx
+│   │   └── TyreStrategy.tsx
 │   ├── services/
-│   │   ├── backendService.ts       # API client for backend
-│   │   ├── dataMapper.ts           # OpenF1 → App type mapping
-│   │   └── geminiService.ts        # AI analysis service
-│   ├── App.tsx                     # Main application
-│   ├── constants.ts                # Teams, seasons, tyre colors
-│   ├── index.tsx                   # Entry point
-│   ├── types.ts                    # TypeScript interfaces
-│   └── mockData.ts                 # Legacy mock data (for reference)
-├── server.ts                       # Express backend with caching
-├── openF1Poller.ts                 # Rate-limited request queue
-├── cache.ts                        # TTL-based cache
+│   │   ├── backendService.ts
+│   │   └── dataMapper.ts
+│   ├── App.tsx
+│   ├── constants.ts
+│   ├── index.tsx
+│   └── types.ts
+├── server.ts
+├── openF1Poller.ts
+├── cache.ts
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
 └── README.md
-```
+🔌 Backend Components
+server.ts
+Express server (port 5000)
 
----
+REST API endpoints
 
-## 🔌 Backend Components
+WebSocket server
 
-### server.ts - Express Backend
-- Runs on port 5000
-- REST API endpoints for all OpenF1 data
-- WebSocket server for cache updates
-- Request queue management
+Central request queue
 
-### openF1Poller.ts - Rate Limiter
-- Sequential request processing (1 per second)
-- Exponential backoff retry: 500ms → 1000ms → 2000ms
-- 3 retry attempts per request
-- Prevents 429 rate-limit errors
+openF1Poller.ts
+Sequential request processing
 
-### cache.ts - In-Memory Cache
-- TTL-based automatic expiration
-- Cache keys: `{endpoint}_{params}`
-- Default TTLs:
-  - Static data: 3600 seconds (1 hour)
-  - Race data: 300 seconds (5 minutes)
+Configurable delay between requests
 
----
+Exponential backoff retries
 
-## 📊 Data Accuracy
+Prevents API throttling
 
-### Grid Position
-- **Source:** Qualifying session results
-- **Fallback:** Starting grid endpoint
-- **Default:** P20
+cache.ts
+In-memory cache with TTL
 
-### Position History
-- **Method:** Timestamp-based correlation
-- Position updates (has `date`) matched to laps (has `date_start`)
-- Carries forward last known position for all laps
+Endpoint + parameter based keys
 
-### Fastest Lap
-- **Calculation:** Minimum lap_duration from all driver laps
-- **Source:** OpenF1 laps endpoint
-- **Format:** M:SS.mmm
+Automatic expiration
 
-### Pit Stops
-- **Calculation:** Count of laps where `is_pit_out_lap` = true
-- **Source:** OpenF1 laps endpoint
+📊 Data Processing
+Grid Position
+Source: Qualifying results
 
----
+Fallback: Grid endpoint
 
-## ⚙️ Configuration
+Default: P20
 
-### Rate Limiting
+Position History
+Timestamp-based correlation
 
-Edit **openF1Poller.ts** to adjust request delays:
+Carries forward last known position
 
-```typescript
-const REQUEST_DELAY = 1000; // milliseconds between requests
-```
+Fastest Lap
+Minimum lap duration across all laps
 
-Recommendations:
-- **1000ms**: Conservative, safe (1 req/sec) - **RECOMMENDED**
-- **500ms**: Moderate (2 req/sec)
-- **200ms**: Aggressive (5 req/sec)
+Excludes pit anomalies
 
-### Cache TTL
+Pit Stops
+Count of is_pit_out_lap === true
 
-Edit **server.ts** endpoint handlers:
+⚙️ Configuration
+Rate Limiting
+In openF1Poller.ts:
 
-```typescript
-// For static data (meetings, sessions)
-cache.set(cacheKey, data, 3600); // 1 hour
-
-// For race data (results, grid, telemetry)
-cache.set(cacheKey, data, 300); // 5 minutes
-```
-
-### Environment Variables
-
-```bash
-# .env.local (development)
-VITE_GEMINI_API_KEY=your_api_key_here
-VITE_BACKEND_URL=http://localhost:5000
-
-# Production should use absolute URLs
-VITE_BACKEND_URL=https://api.yourdomain.com
-```
-
----
-
-## 🧪 Testing
-
-### Health Check
-```bash
+ts
+Copy code
+const REQUEST_DELAY = 1000; // ms
+Cache TTL
+ts
+Copy code
+cache.set(key, data, 3600); // static data
+cache.set(key, data, 300);  // race data
+🧪 Testing
+Health Check
+bash
+Copy code
 curl http://localhost:5000/health
-# Response: {"status":"ok","timestamp":1234567890}
-```
-
-### Verify API Connection
-```bash
-# Get 2025 season races
+Verify API
+bash
+Copy code
 curl http://localhost:5000/api/meetings/2025
-```
+WebSocket
+Browser console should show:
 
-### Check WebSocket Connection
-Open browser DevTools → Console and look for:
-```
-✓ Connected to backend WebSocket
-```
+css
+Copy code
+Connected to backend WebSocket
+🐛 Troubleshooting
+429 Errors
+Increase request delay
 
----
+Restart backend
 
-## 🐛 Troubleshooting
+Verify OpenF1 API status
 
-### "429 Too Many Requests" Errors
-- Increase `REQUEST_DELAY` in openF1Poller.ts
-- Clear backend cache (restart server)
-- Check OpenF1 API status
+Missing Driver Data
+Qualifying data may be unavailable
 
-### Missing Data for Driver
-- Grid position may not exist in Qualifying results
-- Will default to P20
-- Check browser console for errors
+Defaults applied automatically
 
-### Graph Shows All Position 20
-- Hard refresh browser (Ctrl+Shift+R)
-- Check that laps data is being fetched
-- Verify timestamp correlation in DevTools
+Flat Position Graph
+Hard refresh browser
 
-### Backend Not Connecting
-- Ensure backend is running: `npm run dev`
-- Check `VITE_BACKEND_URL` in environment
-- Look for CORS errors in browser console
+Verify laps endpoint response
 
----
+📦 Dependencies
+Frontend
+React
 
-## 📦 Dependencies
+TypeScript
 
-### Frontend
-- React 19
-- TypeScript
-- Vite
-- Tailwind CSS
-- Recharts (charting)
+Vite
 
-### Backend
-- Express.js
-- ws (WebSocket)
-- tsx (TypeScript execution)
-- CORS support
+Tailwind CSS
 
-### APIs
-- OpenF1 API (F1 telemetry data)
-- Google Gemini API (AI analysis)
+Recharts
 
----
+Backend
+Express.js
 
-## 🎯 Current Features
+ws
 
-✅ Real-time race telemetry from OpenF1 API  
-✅ AI-powered race analysis with Gemini  
-✅ Multi-season support (2025, 2024, 2023)  
-✅ Rate-limited backend polling (no 429 errors)  
-✅ In-memory caching with TTL  
-✅ WebSocket real-time updates  
-✅ Accurate grid positions from Qualifying  
-✅ Position history with timestamp correlation  
-✅ Real fastest lap calculation  
-✅ Actual pit stop counting  
-✅ Tyre strategy visualization  
-✅ Driver performance ratings  
+tsx
 
----
+CORS
 
-## 🔄 Data Flow Example
+Data Source
+OpenF1 API
 
-**User selects "Max Verstappen" in 2024 Bahrain race:**
-
-1. Frontend requests laps: `GET /api/laps/9472/1`
-2. Backend checks cache:
-   - ❌ Cache miss
-3. Backend adds to queue (1 req/sec)
-4. After 1 second, backend fetches: `GET https://api.openf1.org/v1/laps?session_key=9472&driver_number=1`
-5. Backend caches result (5-min TTL)
-6. Frontend receives 57 laps with durations
-7. App calculates fastest lap: `1:31.447`
-8. App counts pit stops: `2`
-9. WebSocket notifies other connected clients of cache update
-
----
-
-## 📝 Notes
-
-- OpenF1 API provides lap data but **not gap-to-leader metrics** (requires official FIA timing)
-- Fastest lap is calculated from minimum lap_duration (excludes pit laps)
-- Pit stops counted from `is_pit_out_lap` flag in lap data
-- Position history fills gaps by carrying forward last known position
-
----
-
-## 🤝 Support
-
-For issues:
-1. Check the troubleshooting section
-2. Verify environment variables are set
-3. Ensure both backend and frontend are running
-4. Check browser console for specific errors
-5. Verify OpenF1 API availability at https://api.openf1.org/v1
-
----
-
-## 📄 License
-
+📄 License
 MIT
-=======
-# f1-ai-telemetry
-AI Telemetry — RaceExplainer is a Formula 1 telemetry analysis app that processes OpenF1 data to reconstruct driver positions, grid order, and race metrics like pit stops and fastest laps, presenting them through interactive visualisations with AI-generated insights.
->>>>>>> 33c96933d34b43b5e20b4e891f135321ead65cbc
+
+Copy code
