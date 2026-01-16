@@ -1,0 +1,4 @@
+{
+  "name": "AI Telemetry – RaceExplainer",
+  "description": "An F1-inspired telemetry dashboard that uses Gemini AI to generate human-readable race analysis and strategy explanations based on historical race data."
+}
