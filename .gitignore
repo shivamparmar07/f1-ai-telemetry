@@ -21,4 +21,18 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sln
+
 *.sw?
+# Environment files (DO NOT COMMIT)
+.env
+.env.local
+.env.*.local
+
+# Node / build files
+node_modules/
+dist/
+build/
+
+# OS / editor
+.DS_Store
+
