@@ -1,6 +1,6 @@
 # AI Telemetry — RaceExplainer
 
-A Formula 1 telemetry analysis application built on the OpenF1 API.  
+A Formula 1 telemetry analysis application built on the OpenF1 API.
 The app reconstructs race data such as driver positions, grid order, pit stops, fastest laps, and tyre strategies, and presents them through interactive visualizations.
 
 ---
@@ -8,110 +8,126 @@ The app reconstructs race data such as driver positions, grid order, pit stops, 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js (v16+)
+
+* Node.js (v16+)
 
 ### Installation
 
 1. **Install dependencies**
+
    ```bash
    npm install
-Configure environment
-Create a .env.local file:
+   ```
 
-bash
-Copy code
-VITE_BACKEND_URL=http://localhost:5000
-Run the app
+2. **Configure environment**
+   Create a `.env.local` file in the project root:
 
-bash
-Copy code
-npm run dev
+   ```bash
+   VITE_BACKEND_URL=http://localhost:5000
+   ```
+
+3. **Run the app**
+
+   ```bash
+   npm run dev
+   ```
+
 This starts:
 
-Backend: Express server at http://localhost:5000
+* **Backend:** [http://localhost:5000](http://localhost:5000)
+* **Frontend:** [http://localhost:5173](http://localhost:5173) (or next available port)
 
-Frontend: Vite dev server at http://localhost:5173 (or next available port)
+---
 
-🏗️ Architecture
-Overview
-scss
-Copy code
+## 🏗️ Architecture
+
+### Overview
+
+```
 Frontend (React + TypeScript)
-    ↓ (HTTP REST + WebSocket)
+    ↓ HTTP (REST + WebSocket)
 Backend (Express.js)
-    ↓ (Rate-limited polling + cache)
+    ↓ Rate-limited polling + cache
 OpenF1 API
-Why This Architecture?
-Problem
+```
 
-OpenF1 enforces strict rate limits
+### Why This Architecture?
 
-Parallel frontend requests caused frequent 429 Too Many Requests
+**Problems**
 
-No shared cache between clients
+* OpenF1 enforces strict rate limits
+* Parallel frontend requests caused frequent `429 Too Many Requests`
+* No shared cache between clients
 
-Solution
+**Solutions**
 
-Backend-controlled request queue
+* Backend-controlled request queue
+* Centralized in-memory caching with TTL
+* WebSocket updates for real-time synchronization
 
-Centralized caching with TTL
+**Benefits**
 
-WebSocket-based updates
+* Stable API usage
+* Faster repeated requests
+* Consistent data across all clients
 
-Benefits
+---
 
-Stable API usage
+## 📊 Features
 
-Faster repeated requests
+### Telemetry & Race Data
 
-Consistent data across clients
+* Driver position history
+* Starting grid reconstruction
+* Fastest lap calculation
+* Pit stop counting
+* Tyre compound and stint visualization
 
-📊 Features
-Telemetry & Race Data
-Driver position history
+### Multi-Season Support
 
-Starting grid reconstruction
+* 2025, 2024, 2023 seasons
+* Complete driver lineups
+* All race sessions
 
-Fastest lap calculation
+### Data Accuracy
 
-Pit stop counting
+* Grid positions derived from Qualifying results
+* Timestamp-based position reconstruction
+* Real lap durations from OpenF1
 
-Tyre compound and stint visualization
+---
 
-Multi-Season Support
-2025, 2024, 2023 seasons
+## 🔧 Backend API
 
-Complete driver lineups
-
-All race sessions
-
-Data Accuracy
-Grid positions derived from Qualifying results
-
-Timestamp-based position reconstruction
-
-Real lap durations from OpenF1
-
-🔧 Backend API
 All endpoints are cached and rate-limited.
 
-Endpoint	Method	Description
-/api/meetings/:year	GET	Meetings for a season
-/api/sessions/:meetingKey	GET	Sessions for a meeting
-/api/drivers/:sessionKey	GET	Drivers in a session
-/api/session-results/:sessionKey	GET	Final session results
-/api/grid/:sessionKey	GET	Starting grid
-/api/stints/:sessionKey/:driverNumber	GET	Tyre stints
-/api/laps/:sessionKey/:driverNumber	GET	Lap data
-/api/positions/:sessionKey/:driverNumber	GET	Position history
-/health	GET	Health check
+| Endpoint                                   | Method | Description            |
+| ------------------------------------------ | ------ | ---------------------- |
+| `/api/meetings/:year`                      | GET    | Meetings for a season  |
+| `/api/sessions/:meetingKey`                | GET    | Sessions for a meeting |
+| `/api/drivers/:sessionKey`                 | GET    | Drivers in a session   |
+| `/api/session-results/:sessionKey`         | GET    | Final session results  |
+| `/api/grid/:sessionKey`                    | GET    | Starting grid          |
+| `/api/stints/:sessionKey/:driverNumber`    | GET    | Tyre stints            |
+| `/api/laps/:sessionKey/:driverNumber`      | GET    | Lap data               |
+| `/api/positions/:sessionKey/:driverNumber` | GET    | Position history       |
+| `/health`                                  | GET    | Health check           |
 
-WebSocket
-Clients connect to ws://localhost:5000 for real-time cache updates.
+### WebSocket
 
-📁 Project Structure
-pgsql
-Copy code
+Clients connect to:
+
+```
+ws://localhost:5000
+```
+
+Used for real-time cache update notifications.
+
+---
+
+## 📁 Project Structure
+
+```
 .
 ├── public/
 ├── src/
@@ -134,123 +150,144 @@ Copy code
 ├── tsconfig.json
 ├── vite.config.ts
 └── README.md
-🔌 Backend Components
-server.ts
-Express server (port 5000)
+```
 
-REST API endpoints
+---
 
-WebSocket server
+## 🔌 Backend Components
 
-Central request queue
+### server.ts
 
-openF1Poller.ts
-Sequential request processing
+* Express server (port 5000)
+* REST API endpoints
+* WebSocket server
+* Central request queue
 
-Configurable delay between requests
+### openF1Poller.ts
 
-Exponential backoff retries
+* Sequential request processing
+* Configurable delay between requests
+* Exponential backoff retries
+* Prevents API throttling
 
-Prevents API throttling
+### cache.ts
 
-cache.ts
-In-memory cache with TTL
+* In-memory cache with TTL
+* Endpoint + parameter-based keys
+* Automatic expiration
 
-Endpoint + parameter based keys
+---
 
-Automatic expiration
+## 📊 Data Processing
 
-📊 Data Processing
-Grid Position
-Source: Qualifying results
+### Grid Position
 
-Fallback: Grid endpoint
+* Source: Qualifying results
+* Fallback: Grid endpoint
+* Default: P20
 
-Default: P20
+### Position History
 
-Position History
-Timestamp-based correlation
+* Timestamp-based correlation
+* Carries forward last known position
 
-Carries forward last known position
+### Fastest Lap
 
-Fastest Lap
-Minimum lap duration across all laps
+* Minimum lap duration across all laps
+* Excludes pit anomalies
 
-Excludes pit anomalies
+### Pit Stops
 
-Pit Stops
-Count of is_pit_out_lap === true
+* Count of `is_pit_out_lap === true`
 
-⚙️ Configuration
-Rate Limiting
-In openF1Poller.ts:
+---
 
-ts
-Copy code
-const REQUEST_DELAY = 1000; // ms
-Cache TTL
-ts
-Copy code
+## ⚙️ Configuration
+
+### Rate Limiting
+
+In `openF1Poller.ts`:
+
+```ts
+const REQUEST_DELAY = 1000; // milliseconds
+```
+
+### Cache TTL
+
+```ts
 cache.set(key, data, 3600); // static data
 cache.set(key, data, 300);  // race data
-🧪 Testing
-Health Check
-bash
-Copy code
+```
+
+---
+
+## 🧪 Testing
+
+### Health Check
+
+```bash
 curl http://localhost:5000/health
-Verify API
-bash
-Copy code
+```
+
+### Verify API
+
+```bash
 curl http://localhost:5000/api/meetings/2025
-WebSocket
+```
+
+### WebSocket
+
 Browser console should show:
 
-css
-Copy code
+```
 Connected to backend WebSocket
-🐛 Troubleshooting
-429 Errors
-Increase request delay
+```
 
-Restart backend
+---
 
-Verify OpenF1 API status
+## 🐛 Troubleshooting
 
-Missing Driver Data
-Qualifying data may be unavailable
+### 429 Errors
 
-Defaults applied automatically
+* Increase request delay
+* Restart backend
+* Verify OpenF1 API status
 
-Flat Position Graph
-Hard refresh browser
+### Missing Driver Data
 
-Verify laps endpoint response
+* Qualifying data may be unavailable
+* Defaults applied automatically
 
-📦 Dependencies
-Frontend
-React
+### Flat Position Graph
 
-TypeScript
+* Hard refresh browser
+* Verify laps endpoint response
 
-Vite
+---
 
-Tailwind CSS
+## 📦 Dependencies
 
-Recharts
+### Frontend
 
-Backend
-Express.js
+* React
+* TypeScript
+* Vite
+* Tailwind CSS
+* Recharts
 
-ws
+### Backend
 
-tsx
+* Express.js
+* ws
+* tsx
+* CORS
 
-CORS
+### Data Source
 
-Data Source
-OpenF1 API
+* OpenF1 API
 
-📄 License
+---
+
+## 📄 License
+
 MIT
-
-Copy code
