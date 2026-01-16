@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # AI Telemetry - RaceExplainer
 
 <div align="center">
@@ -361,3 +362,7 @@ For issues:
 ## 📄 License
 
 MIT
+=======
+# f1-ai-telemetry
+AI Telemetry — RaceExplainer is a Formula 1 telemetry analysis app that processes OpenF1 data to reconstruct driver positions, grid order, and race metrics like pit stops and fastest laps, presenting them through interactive visualisations with AI-generated insights.
+>>>>>>> 33c96933d34b43b5e20b4e891f135321ead65cbc
