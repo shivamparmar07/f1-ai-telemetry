@@ -2,6 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import { WebSocket, WebSocketServer } from 'ws';
 import http from 'http';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import { APICache } from './cache';
 import {
   fetchMeetings,
@@ -222,6 +227,14 @@ app.get('/api/positions/:sessionKey/:driverNumber', async (req, res) => {
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
+});
+
+// Serve static frontend files
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Catch-all route to serve React's index.html for non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 server.listen(PORT, () => {

@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+.env.local
+.git
+.gitignore
+README.md
+OPENF1_INTEGRATION.md
+PROJECT_STRUCTURE.md
+QUICKSTART.md
+QUICKSTART_BACKEND.md
