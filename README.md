@@ -28,35 +28,35 @@ Screenshots showcasing key parts of the application UI and data visualizations:
 
 ```mermaid
 graph TD
-    subgraph Client [Interactive Frontend - React 19 + TypeScript + Vite]
-        UI_Telemetry[Single Driver Telemetry & AI]
-        UI_Replay[Interactive Lap Replay & Overtake Log]
-        UI_H2H[Head-to-Head Stint Pace Intelligence]
-        UI_HUD[System Observability & Benchmark HUD]
+    subgraph Client ["Interactive Frontend - React 19 + TypeScript + Vite"]
+        UI_Telemetry["Single Driver Telemetry & AI"]
+        UI_Replay["Interactive Lap Replay & Overtake Log"]
+        UI_H2H["Head-to-Head Stint Pace Intelligence"]
+        UI_HUD["System Observability & Benchmark HUD"]
     end
 
-    subgraph Server [Backend Engine - Express.js + WebSocket]
+    subgraph Server ["Backend Engine - Express.js + WebSocket"]
         Router["/api/race-timeline<br/>/api/intelligence/comparison<br/>/api/metrics<br/>/api/benchmark"]
-        
-        subgraph ConcurrencyCore [Resilient Concurrency & Caching Core]
-            SingleFlight[Request Coalescer - Singleflight]
-            Semaphore[Bounded Concurrency Semaphore (Max 3)]
-            Breaker[Circuit Breaker & 8s Abort Timeouts]
-            APICache[(APICache - SWR + Monotonic LRU)]
+
+        subgraph ConcurrencyCore ["Resilient Concurrency & Caching Core"]
+            SingleFlight["Request Coalescer - Singleflight"]
+            Semaphore["Bounded Concurrency Semaphore (Max 3)"]
+            Breaker["Circuit Breaker & 8s Abort Timeouts"]
+            APICache[("APICache - SWR + Monotonic LRU")]
         end
-        
-        subgraph Engines [Analytics & Intelligence Engines]
-            ReconstructEngine[Race Reconstruction Engine]
-            IntelligenceEngine[Race Intelligence & Pace Analytics]
-            MetricsTracker[Reservoir Latency Quantiles (p50/p95/p99)]
+
+        subgraph Engines ["Analytics & Intelligence Engines"]
+            ReconstructEngine["Race Reconstruction Engine"]
+            IntelligenceEngine["Race Intelligence & Pace Analytics"]
+            MetricsTracker["Reservoir Latency Quantiles (p50/p95/p99)"]
         end
     end
 
-    subgraph Upstream [External OpenF1 API Feeds]
+    subgraph Upstream ["External OpenF1 API Feeds"]
         OpenF1["api.openf1.org/v1<br/>/laps, /position, /intervals, /stints, /pit, /race_control"]
     end
 
-    Client -->|REST & WebSocket| Router
+    Client -->|"REST & WebSocket"| Router
     Router --> ReconstructEngine
     Router --> IntelligenceEngine
     Router --> MetricsTracker
@@ -68,9 +68,8 @@ graph TD
     ConcurrencyCore --> SingleFlight
     SingleFlight --> Semaphore
     Semaphore --> Breaker
-    Breaker -->|Exponential Backoff + Jitter| OpenF1
+    Breaker -->|"Exponential Backoff + Jitter"| OpenF1
 ```
-
 ---
 
 ## ⚡ Key Highlights & Core Engineering Features
